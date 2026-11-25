@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3×3 Cube</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1a1a2e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      color: #eee;
+    }
+    #header {
+      padding: 14px 0 6px;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #e0c97f;
+    }
+    #canvas-container {
+      flex: 1;
+      width: 100%;
+      position: relative;
+      min-height: 0;
+    }
+    canvas { display: block; touch-action: none; }
+    #help {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      max-width: 270px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #aaa;
+      background: rgba(22, 33, 62, 0.75);
+      border: 1px solid #0f3460;
+      border-radius: 6px;
+      padding: 8px 10px;
+      pointer-events: none;
+    }
+    #help kbd {
+      font-family: inherit;
+      font-size: 11px;
+      color: #ddd;
+      background: #0f3460;
+      border-radius: 3px;
+      padding: 0 4px;
+    }
+    #info {
+      font-size: 12px;
+      color: #999;
+      text-align: center;
+      padding: 0 16px 2px;
+      max-width: 760px;
+      overflow-wrap: anywhere;
+    }
+    #info span { color: #ddd; }
+    #status {
+      font-size: 13px;
+      color: #888;
+      padding: 2px 0 4px;
+      min-height: 18px;
+    }
+    #status.solved { color: #5dde5d; }
+    #controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 6px 16px 14px;
+      justify-content: center;
+      max-width: 760px;
+    }
+    .btn-group { display: flex; gap: 4px; }
+    button {
+      background: #16213e;
+      color: #ddd;
+      border: 1px solid #0f3460;
+      border-radius: 6px;
+      padding: 6px 13px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    button:hover:not(:disabled) { background: #0f3460; color: #fff; }
+    button:disabled { opacity: 0.4; cursor: default; }
+    button.face-btn { font-weight: 700; min-width: 42px; }
+    .sep { width: 1px; background: #0f3460; margin: 0 4px; }
+  </style>
+</head>
+<body>
+  <div id="header">3×3 CUBE</div>
+  <div id="canvas-container">
+    <div id="help">
+      Drag a sticker to turn its layer. Drag the background to orbit, scroll to zoom.<br />
+      Keys <kbd>U</kbd> <kbd>D</kbd> <kbd>R</kbd> <kbd>L</kbd> <kbd>F</kbd> <kbd>B</kbd>
+      <kbd>M</kbd> <kbd>E</kbd> <kbd>S</kbd> turn clockwise; hold <kbd>Shift</kbd> for
+      counter-clockwise. <kbd>Ctrl</kbd>+<kbd>Z</kbd> undoes the last turn.
+    </div>
+  </div>
+  <div id="status"></div>
+  <div id="info">
+    Scramble: <span id="scramble-text">none</span> &nbsp;|&nbsp;
+    Moves (<span id="move-count">0</span>): <span id="history-text">none</span>
+  </div>
+  <div id="controls">
+    <div class="btn-group">
+      <button class="face-btn" data-move="U">U</button>
+      <button class="face-btn" data-move="U'">U'</button>
+      <button class="face-btn" data-move="D">D</button>
+      <button class="face-btn" data-move="D'">D'</button>
+    </div>
+    <div class="sep"></div>
+    <div class="btn-group">
+      <button class="face-btn" data-move="R">R</button>
+      <button class="face-btn" data-move="R'">R'</button>
+      <button class="face-btn" data-move="L">L</button>
+      <button class="face-btn" data-move="L'">L'</button>
+    </div>
+    <div class="sep"></div>
+    <div class="btn-group">
+      <button class="face-btn" data-move="F">F</button>
+      <button class="face-btn" data-move="F'">F'</button>
+      <button class="face-btn" data-move="B">B</button>
+      <button class="face-btn" data-move="B'">B'</button>
+    </div>
+    <div class="sep"></div>
+    <div class="btn-group">
+      <button class="face-btn" data-move="M">M</button>
+      <button class="face-btn" data-move="M'">M'</button>
+      <button class="face-btn" data-move="E">E</button>
+      <button class="face-btn" data-move="E'">E'</button>
+      <button class="face-btn" data-move="S">S</button>
+      <button class="face-btn" data-move="S'">S'</button>
+    </div>
+    <div class="sep"></div>
+    <div class="btn-group">
+      <button id="btn-scramble">Scramble</button>
+      <button id="btn-undo">Undo</button>
+      <button id="btn-reset">Reset</button>
+    </div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

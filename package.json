@@ -1,0 +1,11 @@
+{
+  "name": "rubiks-cube-solver",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Interactive 3D 3x3 cube in the browser. Solver planned, not implemented yet.",
+  "type": "module",
+  "scripts": {
+    "start": "npx serve .",
+    "test": "node --test"
+  }
+}
