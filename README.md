@@ -4,6 +4,8 @@
 
 I built this as the front end for a cube solver. The cube, the controls and the move logic are done, and the logical model is set up so a solver can read the cube's state and play its solution back.
 
+**Try it:** [joshcc27.github.io/rubiks-cube-solver](https://joshcc27.github.io/rubiks-cube-solver/)
+
 ![The cube after a scramble and three turns](docs/screenshot.png)
 
 ## What works now
