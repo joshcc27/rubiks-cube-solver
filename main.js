@@ -25,7 +25,7 @@ const DRAG_THRESHOLD_PX = 10;
 const AXES = ['x', 'y', 'z'];
 const AXIS_VECTORS = { x: new THREE.Vector3(1, 0, 0), y: new THREE.Vector3(0, 1, 0), z: new THREE.Vector3(0, 0, 1) };
 
-// ── Scene ─────────────────────────────────────────────────────────────────
+// Scene
 const container = document.getElementById('canvas-container');
 const width = () => container.clientWidth;
 const height = () => container.clientHeight;
@@ -56,7 +56,7 @@ window.addEventListener('resize', () => {
   renderer.setSize(width(), height());
 });
 
-// ── Cubies ────────────────────────────────────────────────────────────────
+// Cubies
 // 27 meshes that never change position. A turn is animated by rotating a
 // layer, then the meshes snap back and are repainted from the model. One
 // geometry and seven materials are shared by every mesh, so nothing has to be
@@ -97,7 +97,7 @@ function paint() {
   stickerSlots.forEach(({ mesh, slot }, i) => { mesh.material[slot] = faceMaterials[state[i]]; });
 }
 
-// ── State ─────────────────────────────────────────────────────────────────
+// State
 let state = solvedState(); // 54 facelets, see cube-model.js
 let scramble = [];         // the scramble applied after the last reset
 let history = [];          // moves made since the scramble, used by Undo
@@ -169,7 +169,7 @@ function undo() {
   enqueue(invertMove(history[history.length - 1]), 'undo');
 }
 
-// ── UI ────────────────────────────────────────────────────────────────────
+// UI
 const statusEl = document.getElementById('status');
 const scrambleEl = document.getElementById('scramble-text');
 const countEl = document.getElementById('move-count');
@@ -219,7 +219,7 @@ window.addEventListener('keydown', e => {
   if (BASE_MOVES[base]) enqueue(e.shiftKey ? `${base}'` : base);
 });
 
-// ── Dragging a sticker ────────────────────────────────────────────────────
+// Dragging a sticker
 // A drag that starts on a sticker turns one layer. The layer is chosen by
 // projecting the motion of the touched point under each possible rotation
 // into screen space and picking the one that best matches the drag, so it
@@ -301,7 +301,7 @@ function endDrag(e) {
 renderer.domElement.addEventListener('pointerup', endDrag);
 renderer.domElement.addEventListener('pointercancel', endDrag);
 
-// ── Render loop ───────────────────────────────────────────────────────────
+// Render loop
 let lastTime = null;
 function animate(time) {
   requestAnimationFrame(animate);
