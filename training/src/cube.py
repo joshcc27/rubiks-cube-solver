@@ -25,6 +25,13 @@ NON_CENTRES = [i for i in range(NUM_STICKERS) if i not in CENTRES]
 # Index 18 stands for "no previous move", used at the start of a sequence.
 START = NUM_MOVES
 
+# Every turn the page knows, slice turns included, as plain index lists:
+# after the move, sticker i shows what sticker source[i] showed before. Only
+# used to read scrambles (src/facelets.py); the network uses the 18 face turns.
+EVERY_SOURCE: dict[str, list[int]] = dict(
+    zip(_DATA["every_move"].split(), _DATA["every_source"], strict=True)
+)
+
 
 def _invert(move: str) -> str:
     if move.endswith("2"):

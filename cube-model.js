@@ -110,6 +110,27 @@ export function invertMove(name) {
   return m.turns === 1 ? `${m.base}'` : m.base;
 }
 
+// Parse moves typed by a person, such as "R U R' U'", "RUR'U'" or "R2' U’".
+// Typographic apostrophes count as primes, and "2'" or "'2" as a double turn.
+// Returns move names in the form parseMove accepts. Throws an Error whose
+// message can be shown to the person.
+export function parseSequence(text, maxMoves = 500) {
+  const src = text.replace(/[’‘´`′]/g, "'").trim();
+  const token = /\s*([URFDLBMES])(2'|'2|'|2)?/y;
+  const moves = [];
+  while (token.lastIndex < src.length) {
+    const start = token.lastIndex;
+    const m = token.exec(src);
+    if (!m) {
+      const bad = src.slice(start).trim().split(/\s+/)[0];
+      throw new Error(`"${bad}" isn't a move. Use the letters U D R L F B M E S, optionally followed by ' or 2.`);
+    }
+    moves.push(m[1] + (m[2] === "'" ? "'" : m[2] ? '2' : ''));
+    if (moves.length > maxMoves) throw new Error(`That's more than ${maxMoves} moves.`);
+  }
+  return moves;
+}
+
 // Accepts "R U R' U'" or ['R', 'U', "R'", "U'"].
 export function splitMoves(seq) {
   if (Array.isArray(seq)) return seq;

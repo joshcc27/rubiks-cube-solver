@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  BASE_MOVES, solvedState, applyMove, applyMoves, invertMove, isSolved, generateScramble, relabelByCentres,
+  BASE_MOVES, solvedState, applyMove, applyMoves, invertMove, isSolved, generateScramble, relabelByCentres, parseSequence,
 } from '../cube-model.js';
 
 const ALL_MOVES = Object.keys(BASE_MOVES).flatMap(b => [b, `${b}'`, `${b}2`]);
@@ -126,6 +126,21 @@ test('face turns commute with relabelling, so face-turn solutions carry over', (
   for (const mv of FACE_TURNS) {
     assert.deepEqual(relabelByCentres(applyMove(mixed, mv)), applyMove(relabelByCentres(mixed), mv), mv);
   }
+});
+
+test('typed moves are parsed with or without spaces', () => {
+  assert.deepEqual(parseSequence("R U R' U'"), ['R', 'U', "R'", "U'"]);
+  assert.deepEqual(parseSequence("RUR'U'"), ['R', 'U', "R'", "U'"]);
+  assert.deepEqual(parseSequence("  M2 E' S \n F2' B'2 "), ['M2', "E'", 'S', 'F2', 'B2']);
+  assert.deepEqual(parseSequence('R’ U‘'), ["R'", "U'"]);
+  assert.deepEqual(parseSequence('   '), []);
+});
+
+test('typed moves that are not moves give a readable error', () => {
+  assert.throws(() => parseSequence('R u'), /"u" isn't a move/);
+  assert.throws(() => parseSequence("R x U"), /"x" isn't a move/);
+  assert.throws(() => parseSequence('R3'), /"3" isn't a move/);
+  assert.throws(() => parseSequence('R '.repeat(6), 5), /more than 5 moves/);
 });
 
 test('scrambles use face turns only and never repeat an axis back to back', () => {

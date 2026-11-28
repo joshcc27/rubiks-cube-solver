@@ -4,149 +4,340 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>3×3 Cube</title>
+  <meta name="description" content="A 3D 3×3 cube in the browser, solved by a neural network. Scramble it, turn it, and step through the network's solution." />
+  <meta name="theme-color" content="#1a1a2e" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="3×3 cube with a neural network solver" />
+  <meta property="og:description" content="Scramble a 3D cube in your browser and watch a neural network solve it, move by move." />
+  <meta property="og:url" content="https://joshcc27.github.io/rubiks-cube-solver/" />
+  <meta property="og:image" content="https://joshcc27.github.io/rubiks-cube-solver/docs/screenshot.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3 28 10 16 17 4 10z' fill='%23f2f2f2'/%3E%3Cpath d='M4 10 16 17v12L4 22z' fill='%23c8102e'/%3E%3Cpath d='M28 10 16 17v12l12-7z' fill='%230077cc'/%3E%3C/svg%3E" />
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #1a1a2e;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      height: 100vh;
-      overflow: hidden;
-      font-family: 'Segoe UI', sans-serif;
-      color: #eee;
+    :root {
+      --bg: #1a1a2e;
+      --panel: #16213e;
+      --line: #0f3460;
+      --text: #eee;
+      --muted: #9a9aab;
+      --accent: #e0c97f;
+      --good: #5dde5d;
+      --bad: #ff9a8f;
     }
-    #header {
-      padding: 14px 0 6px;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 14px;
+    }
+    .visually-hidden {
+      position: absolute; width: 1px; height: 1px; overflow: hidden;
+      clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+    }
+
+    /* Layout: stacked on narrow screens, cube beside a side panel on wide ones. */
+    #app {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto 60vh auto;
+      grid-template-rows: auto 60dvh auto;
+      grid-template-areas: "header" "stage" "side";
+      min-height: 100%;
+    }
+    @media (min-width: 900px) {
+      body { overflow: hidden; }
+      #app {
+        height: 100%;
+        grid-template-columns: minmax(0, 1fr) 380px;
+        grid-template-rows: auto minmax(0, 1fr);
+        grid-template-areas: "header header" "stage side";
+      }
+    }
+
+    header {
+      grid-area: header;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px 6px;
+    }
+    h1 {
       font-size: 22px;
       font-weight: 700;
       letter-spacing: 2px;
-      color: #e0c97f;
+      text-transform: uppercase;
+      color: var(--accent);
     }
-    #canvas-container {
-      flex: 1;
-      width: 100%;
-      position: relative;
-      min-height: 0;
+
+    #stage { grid-area: stage; position: relative; overflow: hidden; min-height: 280px; }
+    #stage canvas { position: absolute; inset: 0; display: block; touch-action: none; }
+
+    #view-tools {
+      position: absolute; top: 10px; right: 12px; z-index: 2;
+      display: flex; gap: 6px;
     }
-    canvas { display: block; touch-action: none; }
     #help {
-      position: absolute;
-      top: 10px;
-      left: 12px;
-      max-width: 270px;
-      font-size: 12px;
-      line-height: 1.5;
-      color: #aaa;
-      background: rgba(22, 33, 62, 0.75);
-      border: 1px solid #0f3460;
-      border-radius: 6px;
-      padding: 8px 10px;
-      pointer-events: none;
+      position: absolute; top: 50px; right: 12px; z-index: 2;
+      max-width: min(320px, calc(100% - 24px));
+      font-size: 12.5px; line-height: 1.55; color: #c4c4d0;
+      background: rgba(22, 33, 62, 0.94);
+      border: 1px solid var(--line); border-radius: 8px;
+      padding: 10px 12px;
+      display: flex; flex-direction: column; gap: 6px;
     }
+    #help[hidden] { display: none; }
+    /* On wide screens main.js moves the help to the bottom of the side panel. */
+    #side > #help {
+      position: static; max-width: none;
+      background: none; border: none; border-radius: 0;
+      border-top: 1px solid var(--line); padding: 12px 0 0;
+    }
+    @media (min-width: 900px) { #btn-help { display: none; } }
     #help kbd {
-      font-family: inherit;
-      font-size: 11px;
-      color: #ddd;
-      background: #0f3460;
-      border-radius: 3px;
-      padding: 0 4px;
+      font-family: inherit; font-size: 11px; color: #ddd;
+      background: var(--line); border-radius: 3px; padding: 0 4px;
     }
-    #info {
-      font-size: 12px;
-      color: #999;
-      text-align: center;
-      padding: 0 16px 2px;
-      max-width: 760px;
-      overflow-wrap: anywhere;
+    .touch-help { display: none; }
+    @media (hover: none) and (pointer: coarse) {
+      .touch-help { display: block; }
+      .pointer-help { display: none; }
     }
-    #info span { color: #ddd; }
+
     #status {
-      font-size: 13px;
-      color: #888;
-      padding: 2px 0 4px;
-      min-height: 18px;
-    }
-    #status.solved { color: #5dde5d; }
-    #controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 6px 16px 14px;
-      justify-content: center;
-      max-width: 760px;
-    }
-    .btn-group { display: flex; gap: 4px; }
-    button {
-      background: #16213e;
+      position: absolute; left: 0; right: 0; bottom: 14px; z-index: 2;
+      width: max-content; max-width: calc(100% - 32px); margin: 0 auto;
+      text-align: center;
+      font-size: 15px;
+      padding: 7px 16px;
+      border-radius: 999px;
+      background: rgba(22, 33, 62, 0.92);
+      border: 1px solid var(--line);
       color: #ddd;
-      border: 1px solid #0f3460;
+    }
+    #status[hidden] { display: none; }
+    #status.solved { color: var(--good); border-color: #2f6b3a; }
+    #status.error { color: var(--bad); }
+
+    #side {
+      grid-area: side;
+      display: flex; flex-direction: column; gap: 14px;
+      padding: 12px 16px 20px;
+      width: 100%; max-width: 560px; justify-self: center;
+    }
+    @media (min-width: 900px) {
+      #side { overflow-y: auto; max-width: none; padding: 16px 20px 20px 8px; }
+    }
+
+    /* Buttons */
+    button {
+      font: inherit;
+      background: var(--panel);
+      color: #ddd;
+      border: 1px solid var(--line);
       border-radius: 6px;
-      padding: 6px 13px;
-      font-size: 13px;
+      padding: 7px 12px;
       cursor: pointer;
       transition: background 0.15s, color 0.15s;
     }
-    button:hover:not(:disabled) { background: #0f3460; color: #fff; }
+    button:hover:not(:disabled) { background: var(--line); color: #fff; }
     button:disabled { opacity: 0.4; cursor: default; }
-    button.face-btn { font-weight: 700; min-width: 42px; }
-    .sep { width: 1px; background: #0f3460; margin: 0 4px; }
+    button:focus-visible, summary:focus-visible, input:focus-visible {
+      outline: 2px solid var(--accent); outline-offset: 2px;
+    }
+    button.primary { border-color: #8c7a45; color: var(--accent); font-weight: 600; }
+    button.primary.stop { border-color: #8c4a45; color: var(--bad); }
+    button.tool { padding: 4px 10px; font-size: 12.5px; background: rgba(22, 33, 62, 0.9); }
+    button.tool[aria-pressed="true"], button.tool[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
+    button.text-btn { background: none; border: none; color: var(--muted); text-decoration: underline; padding: 4px 0; }
+    button.text-btn:hover:not(:disabled) { background: none; color: var(--text); }
+
+    #actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+    #actions button { padding: 9px 4px; }
+
+    /* Solution panel */
+    .panel {
+      background: rgba(22, 33, 62, 0.55);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px 12px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .panel[hidden] { display: none; }
+    .panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+    h2 { font-size: 13px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: var(--accent); }
+    #solution-meta { font-size: 12.5px; color: var(--muted); }
+    #solution-moves { list-style: none; display: flex; flex-wrap: wrap; gap: 3px; }
+    #solution-moves button {
+      font-family: Consolas, 'Cascadia Mono', monospace;
+      font-size: 13px; min-width: 34px; padding: 2px 4px;
+      background: none; border-color: transparent; color: var(--muted);
+    }
+    #solution-moves button.done { color: #ddd; }
+    #solution-moves button[aria-current="step"] { background: var(--accent); color: #1a1a2e; border-color: var(--accent); font-weight: 700; }
+    .player { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .player button { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 34px; padding: 0; }
+    .player button.wide { width: 50px; }
+    .player svg { width: 18px; height: 18px; fill: currentColor; }
+    #sol-play .icon-pause { display: none; }
+    #sol-play.playing .icon-pause { display: inline; }
+    #sol-play.playing .icon-play { display: none; }
+    .speed { display: flex; align-items: center; gap: 6px; margin-left: auto; font-size: 12.5px; color: var(--muted); }
+    .speed input { width: 90px; accent-color: var(--accent); }
+    .speed output { min-width: 30px; color: #ddd; }
+
+    /* Scramble and move history */
+    #info { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; }
+    #info div { display: flex; gap: 8px; }
+    #info dt { color: var(--muted); flex: none; }
+    #info dd { color: #ddd; overflow-wrap: anywhere; }
+
+    /* Turn buttons */
+    details { border-top: 1px solid var(--line); padding-top: 10px; }
+    summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+    summary:hover { color: var(--text); }
+    .turn-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; margin-top: 10px; }
+    .turn-grid button { font-weight: 700; padding: 8px 0; }
+
+    /* Typed moves */
+    #moves-form { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--line); padding-top: 12px; }
+    #moves-form label { color: var(--muted); font-size: 13px; }
+    #moves-form .row { display: flex; gap: 6px; flex-wrap: wrap; }
+    #moves-input {
+      flex: 1 1 160px; min-width: 0;
+      font: inherit; font-family: Consolas, 'Cascadia Mono', monospace;
+      color: var(--text); background: #11182e;
+      border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px;
+    }
+    .error { color: var(--bad); font-size: 12.5px; min-height: 1em; }
+
+    /* About */
+    /* No padding on the dialog itself: main.js treats a click on it as a backdrop click. */
+    dialog {
+      margin: auto; max-width: min(520px, calc(100% - 32px));
+      background: var(--panel); color: var(--text);
+      border: 1px solid var(--line); border-radius: 10px;
+      padding: 0; line-height: 1.55;
+    }
+    .dialog-body { padding: 18px 20px; }
+    dialog::backdrop { background: rgba(5, 8, 20, 0.6); }
+    dialog h2 { margin-bottom: 10px; font-size: 15px; }
+    dialog p { margin-bottom: 10px; color: #cfcfda; }
+    dialog a { color: var(--accent); }
+    dialog form { display: flex; justify-content: flex-end; }
   </style>
 </head>
 <body>
-  <div id="header">3×3 CUBE</div>
-  <div id="canvas-container">
-    <div id="help">
-      Drag a sticker to turn its layer. Drag the background to orbit, scroll to zoom.<br />
-      Keys <kbd>U</kbd> <kbd>D</kbd> <kbd>R</kbd> <kbd>L</kbd> <kbd>F</kbd> <kbd>B</kbd>
-      <kbd>M</kbd> <kbd>E</kbd> <kbd>S</kbd> turn clockwise; hold <kbd>Shift</kbd> for
-      counter-clockwise. <kbd>Ctrl</kbd>+<kbd>Z</kbd> undoes the last turn.
-      Solve asks a trained neural network for a solution and plays it.
+  <div id="app">
+    <header>
+      <h1>3×3 Cube</h1>
+      <button id="btn-about" class="text-btn">About the solver</button>
+    </header>
+
+    <div id="stage">
+      <div id="view-tools">
+        <button id="btn-labels" class="tool" aria-pressed="false" title="Show which face is U, D, R, L, F and B">Labels</button>
+        <button id="btn-view" class="tool" title="Put the camera back where it started">Reset view</button>
+        <button id="btn-help" class="tool" aria-expanded="false" aria-controls="help" aria-label="Help">?</button>
+      </div>
+      <div id="help" hidden>
+        <p class="pointer-help">Drag a sticker to turn its layer. Drag the background to orbit, scroll to zoom.</p>
+        <p class="pointer-help">
+          Keys <kbd>U</kbd> <kbd>D</kbd> <kbd>R</kbd> <kbd>L</kbd> <kbd>F</kbd> <kbd>B</kbd> <kbd>M</kbd> <kbd>E</kbd> <kbd>S</kbd>
+          turn clockwise; hold <kbd>Shift</kbd> for counter-clockwise. <kbd>Ctrl</kbd>+<kbd>Z</kbd> undoes.
+          With a solution showing, <kbd>←</kbd> <kbd>→</kbd> step through it and <kbd>Space</kbd> plays or pauses.
+        </p>
+        <p class="touch-help">Drag a sticker to turn its layer. Drag the background to rotate the view, pinch to zoom. More controls are under Turn buttons.</p>
+        <p>Solve asks a trained neural network for a solution and plays it. You can pause it, step through it and change its speed.</p>
+      </div>
+      <div id="status" hidden></div>
+    </div>
+
+    <div id="side">
+      <div id="actions">
+        <button id="btn-scramble">Scramble</button>
+        <button id="btn-solve" class="primary">Solve</button>
+        <button id="btn-undo">Undo</button>
+        <button id="btn-reset">Reset</button>
+      </div>
+
+      <section id="solution-panel" class="panel" aria-labelledby="solution-title" hidden>
+        <div class="panel-head">
+          <h2 id="solution-title">Network's solution</h2>
+          <span id="solution-meta"></span>
+        </div>
+        <ol id="solution-moves"></ol>
+        <div class="player">
+          <button id="sol-start" aria-label="Back to the start"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2v14H4zM13 5v14L6 12zM21 5v14l-7-7z"/></svg></button>
+          <button id="sol-back" aria-label="Step back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2v14H6zM18 5v14l-9-7z"/></svg></button>
+          <button id="sol-play" class="wide" aria-label="Play">
+            <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l11-7z"/></svg>
+            <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+          </button>
+          <button id="sol-fwd" aria-label="Step forward"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 5h2v14h-2zM6 5v14l9-7z"/></svg></button>
+          <button id="sol-end" aria-label="Go to the end"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 5h2v14h-2zM11 5v14l7-7zM3 5v14l7-7z"/></svg></button>
+          <label class="speed">Speed
+            <input id="sol-speed" type="range" min="0" max="4" step="1" value="1" />
+            <output id="sol-speed-out" for="sol-speed">1×</output>
+          </label>
+        </div>
+      </section>
+
+      <dl id="info">
+        <div><dt>Scramble</dt><dd id="scramble-text">none</dd></div>
+        <div><dt>Moves (<span id="move-count">0</span>)</dt><dd id="history-text">none</dd></div>
+      </dl>
+
+      <details id="turns">
+        <summary>Turn buttons</summary>
+        <div class="turn-grid">
+          <button class="face-btn" data-move="U">U</button>
+          <button class="face-btn" data-move="U'">U'</button>
+          <button class="face-btn" data-move="D">D</button>
+          <button class="face-btn" data-move="D'">D'</button>
+          <button class="face-btn" data-move="R">R</button>
+          <button class="face-btn" data-move="R'">R'</button>
+          <button class="face-btn" data-move="L">L</button>
+          <button class="face-btn" data-move="L'">L'</button>
+          <button class="face-btn" data-move="F">F</button>
+          <button class="face-btn" data-move="F'">F'</button>
+          <button class="face-btn" data-move="B">B</button>
+          <button class="face-btn" data-move="B'">B'</button>
+          <button class="face-btn" data-move="M">M</button>
+          <button class="face-btn" data-move="M'">M'</button>
+          <button class="face-btn" data-move="E">E</button>
+          <button class="face-btn" data-move="E'">E'</button>
+          <button class="face-btn" data-move="S">S</button>
+          <button class="face-btn" data-move="S'">S'</button>
+        </div>
+      </details>
+
+      <form id="moves-form" autocomplete="off">
+        <label for="moves-input">Type moves</label>
+        <div class="row">
+          <input id="moves-input" type="text" spellcheck="false" autocapitalize="characters" placeholder="R U R' U'" maxlength="2000" aria-describedby="moves-error" />
+          <button type="submit">Apply</button>
+          <button type="button" id="btn-use-scramble" title="Reset the cube, then apply these moves as the scramble">Use as scramble</button>
+        </div>
+        <p id="moves-error" class="error" aria-live="polite"></p>
+      </form>
     </div>
   </div>
-  <div id="status"></div>
-  <div id="info">
-    Scramble: <span id="scramble-text">none</span> &nbsp;|&nbsp;
-    Moves (<span id="move-count">0</span>): <span id="history-text">none</span>
-  </div>
-  <div id="controls">
-    <div class="btn-group">
-      <button class="face-btn" data-move="U">U</button>
-      <button class="face-btn" data-move="U'">U'</button>
-      <button class="face-btn" data-move="D">D</button>
-      <button class="face-btn" data-move="D'">D'</button>
+
+  <div id="announcer" class="visually-hidden" aria-live="polite"></div>
+
+  <dialog id="about" aria-labelledby="about-title">
+    <div class="dialog-body">
+    <h2 id="about-title">About the solver</h2>
+    <p>Solve runs a small neural network in your browser. It learned by scrambling cubes at random and predicting which move undoes the last turn: 38.7 million examples, one hour of training on a laptop CPU, 2.3 million parameters.</p>
+    <p>On its own the network only solves short scrambles. A beam search keeps the 512 most promising move sequences, extends each by one move at a time, and stops when one solves the cube.</p>
+    <p>In two test runs of 50 random cubes each, it solved all 100, averaging 31 and 33 moves. The shortest solution for a random cube is usually about 18 moves, so the network's solutions are valid but long.</p>
+    <p><a href="https://github.com/joshcc27/rubiks-cube-solver#the-neural-network-solver" target="_blank" rel="noopener">Code and training details on GitHub</a></p>
+    <form method="dialog"><button>Close</button></form>
     </div>
-    <div class="sep"></div>
-    <div class="btn-group">
-      <button class="face-btn" data-move="R">R</button>
-      <button class="face-btn" data-move="R'">R'</button>
-      <button class="face-btn" data-move="L">L</button>
-      <button class="face-btn" data-move="L'">L'</button>
-    </div>
-    <div class="sep"></div>
-    <div class="btn-group">
-      <button class="face-btn" data-move="F">F</button>
-      <button class="face-btn" data-move="F'">F'</button>
-      <button class="face-btn" data-move="B">B</button>
-      <button class="face-btn" data-move="B'">B'</button>
-    </div>
-    <div class="sep"></div>
-    <div class="btn-group">
-      <button class="face-btn" data-move="M">M</button>
-      <button class="face-btn" data-move="M'">M'</button>
-      <button class="face-btn" data-move="E">E</button>
-      <button class="face-btn" data-move="E'">E'</button>
-      <button class="face-btn" data-move="S">S</button>
-      <button class="face-btn" data-move="S'">S'</button>
-    </div>
-    <div class="sep"></div>
-    <div class="btn-group">
-      <button id="btn-scramble">Scramble</button>
-      <button id="btn-solve">Solve</button>
-      <button id="btn-undo">Undo</button>
-      <button id="btn-reset">Reset</button>
-    </div>
-  </div>
+  </dialog>
 
   <script type="importmap">
   {
