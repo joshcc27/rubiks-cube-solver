@@ -1,0 +1,106 @@
+{
+  "faces": "URFDLB",
+  "moves": "U U' U2 R R' R2 F F' F2 D D' D2 L L' L2 B B' B2",
+  "source": [
+    [6, 3, 0, 7, 4, 1, 8, 5, 2, 45, 46, 47, 12, 13, 14, 15, 16, 17, 9, 10, 11, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 18, 19, 20, 39, 40, 41, 42, 43, 44, 36, 37, 38, 48, 49, 50, 51, 52, 53],
+    [2, 5, 8, 1, 4, 7, 0, 3, 6, 18, 19, 20, 12, 13, 14, 15, 16, 17, 36, 37, 38, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 45, 46, 47, 39, 40, 41, 42, 43, 44, 9, 10, 11, 48, 49, 50, 51, 52, 53],
+    [8, 7, 6, 5, 4, 3, 2, 1, 0, 36, 37, 38, 12, 13, 14, 15, 16, 17, 45, 46, 47, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 9, 10, 11, 39, 40, 41, 42, 43, 44, 18, 19, 20, 48, 49, 50, 51, 52, 53],
+    [0, 1, 20, 3, 4, 23, 6, 7, 26, 15, 12, 9, 16, 13, 10, 17, 14, 11, 18, 19, 29, 21, 22, 32, 24, 25, 35, 27, 28, 51, 30, 31, 48, 33, 34, 45, 36, 37, 38, 39, 40, 41, 42, 43, 44, 8, 46, 47, 5, 49, 50, 2, 52, 53],
+    [0, 1, 51, 3, 4, 48, 6, 7, 45, 11, 14, 17, 10, 13, 16, 9, 12, 15, 18, 19, 2, 21, 22, 5, 24, 25, 8, 27, 28, 20, 30, 31, 23, 33, 34, 26, 36, 37, 38, 39, 40, 41, 42, 43, 44, 35, 46, 47, 32, 49, 50, 29, 52, 53],
+    [0, 1, 29, 3, 4, 32, 6, 7, 35, 17, 16, 15, 14, 13, 12, 11, 10, 9, 18, 19, 51, 21, 22, 48, 24, 25, 45, 27, 28, 2, 30, 31, 5, 33, 34, 8, 36, 37, 38, 39, 40, 41, 42, 43, 44, 26, 46, 47, 23, 49, 50, 20, 52, 53],
+    [0, 1, 2, 3, 4, 5, 44, 41, 38, 6, 10, 11, 7, 13, 14, 8, 16, 17, 24, 21, 18, 25, 22, 19, 26, 23, 20, 15, 12, 9, 30, 31, 32, 33, 34, 35, 36, 37, 27, 39, 40, 28, 42, 43, 29, 45, 46, 47, 48, 49, 50, 51, 52, 53],
+    [0, 1, 2, 3, 4, 5, 9, 12, 15, 29, 10, 11, 28, 13, 14, 27, 16, 17, 20, 23, 26, 19, 22, 25, 18, 21, 24, 38, 41, 44, 30, 31, 32, 33, 34, 35, 36, 37, 8, 39, 40, 7, 42, 43, 6, 45, 46, 47, 48, 49, 50, 51, 52, 53],
+    [0, 1, 2, 3, 4, 5, 29, 28, 27, 44, 10, 11, 41, 13, 14, 38, 16, 17, 26, 25, 24, 23, 22, 21, 20, 19, 18, 8, 7, 6, 30, 31, 32, 33, 34, 35, 36, 37, 15, 39, 40, 12, 42, 43, 9, 45, 46, 47, 48, 49, 50, 51, 52, 53],
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 24, 25, 26, 18, 19, 20, 21, 22, 23, 42, 43, 44, 33, 30, 27, 34, 31, 28, 35, 32, 29, 36, 37, 38, 39, 40, 41, 51, 52, 53, 45, 46, 47, 48, 49, 50, 15, 16, 17],
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 51, 52, 53, 18, 19, 20, 21, 22, 23, 15, 16, 17, 29, 32, 35, 28, 31, 34, 27, 30, 33, 36, 37, 38, 39, 40, 41, 24, 25, 26, 45, 46, 47, 48, 49, 50, 42, 43, 44],
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 42, 43, 44, 18, 19, 20, 21, 22, 23, 51, 52, 53, 35, 34, 33, 32, 31, 30, 29, 28, 27, 36, 37, 38, 39, 40, 41, 15, 16, 17, 45, 46, 47, 48, 49, 50, 24, 25, 26],
+    [53, 1, 2, 50, 4, 5, 47, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 0, 19, 20, 3, 22, 23, 6, 25, 26, 18, 28, 29, 21, 31, 32, 24, 34, 35, 42, 39, 36, 43, 40, 37, 44, 41, 38, 45, 46, 33, 48, 49, 30, 51, 52, 27],
+    [18, 1, 2, 21, 4, 5, 24, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 27, 19, 20, 30, 22, 23, 33, 25, 26, 53, 28, 29, 50, 31, 32, 47, 34, 35, 38, 41, 44, 37, 40, 43, 36, 39, 42, 45, 46, 6, 48, 49, 3, 51, 52, 0],
+    [27, 1, 2, 30, 4, 5, 33, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 53, 19, 20, 50, 22, 23, 47, 25, 26, 0, 28, 29, 3, 31, 32, 6, 34, 35, 44, 43, 42, 41, 40, 39, 38, 37, 36, 45, 46, 24, 48, 49, 21, 51, 52, 18],
+    [11, 14, 17, 3, 4, 5, 6, 7, 8, 9, 10, 35, 12, 13, 34, 15, 16, 33, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 36, 39, 42, 2, 37, 38, 1, 40, 41, 0, 43, 44, 51, 48, 45, 52, 49, 46, 53, 50, 47],
+    [42, 39, 36, 3, 4, 5, 6, 7, 8, 9, 10, 0, 12, 13, 1, 15, 16, 2, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 17, 14, 11, 33, 37, 38, 34, 40, 41, 35, 43, 44, 47, 50, 53, 46, 49, 52, 45, 48, 51],
+    [35, 34, 33, 3, 4, 5, 6, 7, 8, 9, 10, 42, 12, 13, 39, 15, 16, 36, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 2, 1, 0, 17, 37, 38, 14, 40, 41, 11, 43, 44, 53, 52, 51, 50, 49, 48, 47, 46, 45]
+  ],
+  "examples": [
+    {
+      "moves": "D F2 U R' D2 F' R2 U' R2 R2 U L F D2 U D2 F2 U B F D2 F D R2 U L' B' L2 F R",
+      "state": "LBFDULDRURUULRRUFRBUFRFBRFBBULFDDUBFFLLFLBRLDLDDDBRDUB"
+    },
+    {
+      "moves": "D U2 U' R F R2 D2 L2 D2 F R U' U' F' B2 B' U' U U' B U' U2 D R2 D B2 F2 B2 R U",
+      "state": "FFFLURRLBUBDBRDFBBFULLFDDUUBFLRDUDDUDBUFLDBULRLLFBRRRR"
+    },
+    {
+      "moves": "L B D' U2 B2 L2 B F' D L2 D2 B B L2 R L2 L' B F F' L' B2 B' L R' D' R2 F' F' F",
+      "state": "LUFBUFDRDLLDDRDUUFRBFFFFBDRUBBLDLFFUDLBULRRDLRBBRBRLUU"
+    },
+    {
+      "moves": "R' U' B F2 F2 D U B' D L2 U2 F B2 U D L2 U2 B F D D2 L' B L' D U2 F U' F U'",
+      "state": "FDLBUFRUDBLDURFRUUBBLDFFRLUUDFFDRRLBLRDULRFDBFBURBLLBD"
+    },
+    {
+      "moves": "B F R2 R F' F' R' L' B F2 D2 F2 L L B R L' L2 F2 F U2 D2 L F U F' R R' B2 B",
+      "state": "LRRDUUFLLBBBLRURRRRBUUFFLDUULFUDBLRDDBDDLFDLFUFBRBFBDF"
+    },
+    {
+      "moves": "F2 R' L U2 D2 B U' B' R U' F' U' D D' D U' U L2 D' B' B' L' R F B F2 L2 U2 U' R2",
+      "state": "DUDBUDDBBDRLBRLURULDRRFRBFRULBDDFFFFFLFDLUULLBBRUBFRUL"
+    },
+    {
+      "moves": "L' L2 L D' L L R D' F' R2 B' F D2 L' R U2 F D2 B2 R2 B2 R2 D L L' D2 R' R' R' B",
+      "state": "ULLDUUDRUBLUDRBFFRBFRRFRUDLFLDRDDDLFRBLULBBULBFFUBFDBR"
+    },
+    {
+      "moves": "U D R2 B2 D R2 F2 D' D B2 B R2 B2 D' F B2 D D2 B F' D' D2 U D D' B D2 F2 D F2",
+      "state": "LULDULRDBRFBRRRDFDDLUBFFFLBLURDDDRUFBBFULLURUDRUBBFLBF"
+    },
+    {
+      "moves": "U2 R2 L2 D F' B2 L' B2 U2 D2 F' F2 F F2 D' U2 U2 R2 L2 L F2 B' F B L' R' L' R U2 R2",
+      "state": "DLRLUBFRDLUDURFULBRBFDFRLUFULRDDFRDLBBDULRBBFBDLRBFUFU"
+    },
+    {
+      "moves": "R R2 U' U' U2 U L2 D2 B2 R' D U2 B2 U2 U' D U U2 F2 D' D L2 F L L2 B2 D2 U R' R'",
+      "state": "DFRFUUFDLBBBRRUDBUULUFFBBRRDUFFDDBLLLURRLLDRRUDFLBDFBL"
+    },
+    {
+      "moves": "D2 B F2 B U' B' U L L U B2 L2 D2 D2 R' U' D D R2 D' B' L2 F L2 D U D L U2 L'",
+      "state": "UDFFUBBLRBRLURFURLRBDRFLRDLDFFUDDULBRLUBLUBFFDBFRBUDDL"
+    },
+    {
+      "moves": "D' B' L2 L' B2 L U F2 D' U2 U2 R' B' D' F' L' F' L F D' R B R2 D2 R2 R R2 U2 B2 U",
+      "state": "FBBFUBLUBRLRFRLDRFBFUDFRBLFLULDDUUDDUDUBLBLLDDRRFBURRF"
+    },
+    {
+      "moves": "U2 F L F2 F2 B2 L' B' U' B B' R' B' R' L' U2 R R2 B' L D' U' L' R2 L2 B U' D' L' L2",
+      "state": "BFUUUDBDURRBURBRRFLLFDFRLFDFUBBDFULDRBDDLFLLDLLURBBRUF"
+    },
+    {
+      "moves": "R2 B2 R' L' U2 B2 R' R' R' D' L B' B L2 L B D' B2 D2 R R D' L' B F D' L' U2 B2 U",
+      "state": "FULRURLRLFFUDRLRBLUDDUFBBFBDUUFDLUFBRBFRLBFDRBLDDBUDLR"
+    },
+    {
+      "moves": "F2 U' R' D2 R' F2 B F2 D' R R R2 R' B' B' D U' R' L2 R' U' B' B2 U' F2 R F2 L' B2 R2",
+      "state": "FRDUURRFFRBLDRUBBBBUDFFRLBLFDUFDLUUUULDDLLLDDBFRRBLRBF"
+    },
+    {
+      "moves": "D U' L2 D2 B' F D2 R U U' U' F B' B2 D2 U' D' U' D2 L2 R' B2 F' F' D2 U2 B' U2 D2 F'",
+      "state": "FUDFUFULRFRLRRRRDDLUUDFBDLBLFULDBRDRLDBFLLDBFBBUUBUFRB"
+    },
+    {
+      "moves": "L' D D' B2 B F D U R' R2 R2 L' R D' F L2 F' R' R U F2 B2 D' B D L2 L F L' L'",
+      "state": "FRRDUFFBDBLUDRFRRRRULUFLDRBLBUFDDBBDLBDLLRLUFFFUDBUBLU"
+    },
+    {
+      "moves": "D' F' U2 L2 R2 R R' D B' B F2 U2 R F2 U' U2 R' R' B F' B' B' B R R2 L' B' B2 R B2",
+      "state": "FBDLURBFRUDBRRDFUULDBDFFULRLFUFDLFRLDBDRLLDUBRULBBBFUR"
+    },
+    {
+      "moves": "D L2 U' R' B' L U' R U2 D2 U' B L D D L' R' D2 L' L' B2 L B D L2 R' D B2 R2 D",
+      "state": "LBDDUFBUBDLRRRDLBLRFRUFFFUUDRBLDURDFDRUDLLUBLFRBLBFUBF"
+    },
+    {
+      "moves": "B' R2 B' R D2 R2 L2 D' L D2 D' D' U' L L R' B' U B R' D' U L F2 B' D2 R F' L' R'",
+      "state": "RUUFUDBFFLLFRRFLRRLRUUFUDLULBBBDDRDDUUDBLLFDFRBBLBRBFD"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  BASE_MOVES, solvedState, applyMove, applyMoves, invertMove, isSolved, generateScramble,
+  BASE_MOVES, solvedState, applyMove, applyMoves, invertMove, isSolved, generateScramble, relabelByCentres,
 } from '../cube-model.js';
 
 const ALL_MOVES = Object.keys(BASE_MOVES).flatMap(b => [b, `${b}'`, `${b}2`]);
@@ -101,6 +101,31 @@ test('B: left face left column takes the up colours', () => {
   const s = applyMove(solved, 'B');
   assert.equal(col(s, 'L', 0), 'UUU');
   assert.equal(row(s, 'U', 0), 'RRR');
+});
+
+// Relabelling by centres, which lets a face-turn solver handle slice moves.
+const FACE_TURNS = ['U', 'D', 'R', 'L', 'F', 'B'].flatMap(f => [f, `${f}'`, `${f}2`]);
+const centres = state => [4, 13, 22, 31, 40, 49].map(i => state[i]).join('');
+
+test('relabelling puts the centres home and leaves face-turn states alone', () => {
+  const faceOnly = applyMoves(solved, "R U2 F' L D B2");
+  assert.deepEqual(relabelByCentres(faceOnly), faceOnly);
+  for (const mv of ["M", "E'", 'S2', "M E S'"]) {
+    assert.equal(centres(relabelByCentres(applyMoves(start, mv))), 'URFDLB', mv);
+  }
+});
+
+test('after relabelling, each slice turn looks like two face turns', () => {
+  assert.deepEqual(relabelByCentres(applyMove(solved, 'M')), applyMoves(solved, "R L'"));
+  assert.deepEqual(relabelByCentres(applyMove(solved, 'E')), applyMoves(solved, "U D'"));
+  assert.deepEqual(relabelByCentres(applyMove(solved, 'S')), applyMoves(solved, "F' B"));
+});
+
+test('face turns commute with relabelling, so face-turn solutions carry over', () => {
+  const mixed = applyMoves(start, "M2 U E' R S F");
+  for (const mv of FACE_TURNS) {
+    assert.deepEqual(relabelByCentres(applyMove(mixed, mv)), applyMove(relabelByCentres(mixed), mv), mv);
+  }
 });
 
 test('scrambles use face turns only and never repeat an axis back to back', () => {

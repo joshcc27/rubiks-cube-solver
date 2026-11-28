@@ -19,6 +19,10 @@
 
 export const FACES = ['U', 'R', 'F', 'D', 'L', 'B'];
 
+// The 18 face turns, three per face in FACES order. The solver network's
+// outputs are in this order (see training/moves.json).
+export const FACE_MOVES = FACES.flatMap(f => [f, `${f}'`, `${f}2`]);
+
 const AXIS_INDEX = { x: 0, y: 1, z: 2 };
 
 // For each face: its outward normal, and how row r and column c (0..2) map
@@ -142,6 +146,17 @@ export function isSolved(state) {
     for (let i = 1; i < 9; i++) if (state[f * 9 + i] !== first) return false;
   }
   return true;
+}
+
+// Rename every colour after the face whose centre it now shows. Slice moves
+// carry the centres around, and the solver only knows the home layout. After
+// relabelling, the centres are home and the cube can be solved with face turns
+// alone. Face turns never move centres, so they commute with this relabelling,
+// and a face-turn solution of the relabelled state also solves the original.
+export function relabelByCentres(state) {
+  const rename = {};
+  FACES.forEach((face, f) => { rename[state[f * 9 + 4]] = face; });
+  return state.map(x => rename[x]);
 }
 
 // Random-move scramble using face turns only. Two consecutive moves never

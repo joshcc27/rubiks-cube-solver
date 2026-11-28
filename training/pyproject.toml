@@ -1,0 +1,56 @@
+[project]
+name = "rubiks-cube-solver-training"
+version = "0.1.0"
+description = "Trains a neural network that picks cube moves, for the solver in the parent folder."
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=2.5.5",
+    "torch>=2.15.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy",
+    "onnx>=1.23.2",
+    "onnxruntime>=1.32.0",
+    "onnxscript>=0.7.2",
+    "pytest",
+    "ruff",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+]
+ignore = [
+    "E501",  # line too long — ruff format handles this
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.12"
+strict = false
+ignore_missing_imports = true
+warn_return_any = true
+warn_unused_ignores = true
+check_untyped_defs = true

@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import {
-  BASE_MOVES, FACELETS, parseMove, invertMove, solvedState, applyMove, isSolved, generateScramble,
+  BASE_MOVES, FACELETS, parseMove, invertMove, solvedState, applyMove, isSolved, generateScramble, relabelByCentres,
 } from './cube-model.js';
 
 const COLORS = {
@@ -101,13 +101,14 @@ function paint() {
 let state = solvedState(); // 54 facelets, see cube-model.js
 let scramble = [];         // the scramble applied after the last reset
 let history = [];          // moves made since the scramble, used by Undo
-let queue = [];            // pending { move, kind }; kind is 'user', 'undo' or 'scramble'
+let queue = [];            // pending { move, kind }; kind is 'user', 'undo', 'scramble' or 'solve'
 let current = null;        // the turn being animated
 
 const isBusy = () => current !== null || queue.length > 0;
 
 function enqueue(move, kind = 'user') {
   if (!parseMove(move)) return;
+  forgetSolve();
   queue.push({ move, kind });
   updateUI();
 }
@@ -140,13 +141,14 @@ function finishTurn() {
   const { move, kind } = current;
   releaseLayer();
   state = applyMove(state, move);
-  if (kind === 'user') history.push(move);
+  if (kind === 'user' || kind === 'solve') history.push(move);
   else if (kind === 'undo') history.pop();
   paint();
   updateUI();
 }
 
 function reset() {
+  forgetSolve();
   queue = [];
   releaseLayer();
   state = solvedState();
@@ -169,12 +171,78 @@ function undo() {
   enqueue(invertMove(history[history.length - 1]), 'undo');
 }
 
+// Solver
+// The network and its search run in a Web Worker (solver-worker.js), created
+// on the first Solve. Any change to the cube while it searches cancels the
+// request, so a solution always belongs to the cube on screen.
+let solver = null;
+let solveRequest = null;   // { id, state } while the worker is searching
+let lastSolveId = 0;
+let solution = null;       // { length, seconds } of the solution being played or just played
+let solverMessage = '';    // progress, or why the last request found nothing
+
+function getSolver() {
+  if (!solver) {
+    solver = new Worker(new URL('./solver-worker.js', import.meta.url), { type: 'module' });
+    solver.onmessage = ({ data }) => onSolverMessage(data);
+    // Fires if the worker script itself fails to load, for example offline.
+    solver.onerror = event => {
+      event.preventDefault();
+      solver?.terminate();
+      solver = null;
+      solveRequest = null;
+      solverMessage = "The solver couldn't start. It needs network access the first time.";
+      updateUI();
+    };
+  }
+  return solver;
+}
+
+function solve() {
+  if (isBusy() || solveRequest || isSolved(state)) return;
+  solveRequest = { id: ++lastSolveId, state: state.join('') };
+  solverMessage = 'Starting the solver…';
+  // The network only knows the home colour layout, see relabelByCentres.
+  getSolver().postMessage({ type: 'solve', id: solveRequest.id, state: relabelByCentres(state).join('') });
+  updateUI();
+}
+
+// Called whenever the cube changes other than by the solution itself: stops
+// any search in progress and clears the solver's status.
+function forgetSolve() {
+  if (solveRequest) solver?.postMessage({ type: 'cancel' });
+  solveRequest = null;
+  solution = null;
+  solverMessage = '';
+}
+
+function onSolverMessage(msg) {
+  if (!solveRequest || msg.id !== solveRequest.id) return;
+  if (msg.type === 'progress') {
+    solverMessage = msg.text;
+  } else {
+    const request = solveRequest;
+    solveRequest = null;
+    solverMessage = '';
+    if (msg.type === 'error') {
+      solverMessage = `The solver failed: ${msg.message}`;
+    } else if (!msg.moves) {
+      solverMessage = `No solution found after ${msg.seconds.toFixed(1)} s of searching.`;
+    } else if (request.state === state.join('') && !isBusy()) {
+      solution = { length: msg.moves.length, seconds: msg.seconds };
+      msg.moves.forEach(move => queue.push({ move, kind: 'solve' }));
+    }
+  }
+  updateUI();
+}
+
 // UI
 const statusEl = document.getElementById('status');
 const scrambleEl = document.getElementById('scramble-text');
 const countEl = document.getElementById('move-count');
 const historyEl = document.getElementById('history-text');
 const scrambleBtn = document.getElementById('btn-scramble');
+const solveBtn = document.getElementById('btn-solve');
 const undoBtn = document.getElementById('btn-undo');
 
 const MAX_HISTORY_SHOWN = 40;
@@ -182,6 +250,7 @@ const MAX_HISTORY_SHOWN = 40;
 function updateUI() {
   const busy = isBusy();
   scrambleBtn.disabled = busy;
+  solveBtn.disabled = busy || solveRequest !== null || isSolved(state);
   undoBtn.disabled = busy || history.length === 0;
 
   scrambleEl.textContent = scramble.length ? scramble.join(' ') : 'none';
@@ -191,18 +260,24 @@ function updateUI() {
     : history.length > MAX_HISTORY_SHOWN ? `… ${shown}` : shown;
 
   const scrambling = current?.kind === 'scramble' || queue.some(q => q.kind === 'scramble');
+  const playing = current?.kind === 'solve' || queue.some(q => q.kind === 'solve');
   const solved = !busy && isSolved(state);
+  const found = solution && `${solution.length} moves, found in ${solution.seconds.toFixed(1)} s`;
   statusEl.classList.toggle('solved', solved);
   if (scrambling) statusEl.textContent = 'Scrambling…';
+  else if (solveRequest) statusEl.textContent = solverMessage;
+  else if (playing && solution) statusEl.textContent = `Playing the network's solution: ${found}.`;
+  else if (solved && solution) statusEl.textContent = `Solved by the network: ${found}.`;
   else if (solved && scramble.length) statusEl.textContent = `Solved in ${history.length} move${history.length === 1 ? '' : 's'}.`;
   else if (solved) statusEl.textContent = 'Solved.';
-  else statusEl.textContent = '';
+  else statusEl.textContent = solverMessage;
 }
 
 document.querySelectorAll('.face-btn').forEach(btn => {
   btn.addEventListener('click', () => enqueue(btn.dataset.move));
 });
 scrambleBtn.addEventListener('click', startScramble);
+solveBtn.addEventListener('click', solve);
 undoBtn.addEventListener('click', undo);
 document.getElementById('btn-reset').addEventListener('click', reset);
 
